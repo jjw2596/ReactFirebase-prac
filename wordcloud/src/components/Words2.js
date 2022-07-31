@@ -12,6 +12,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import TextField from "@material-ui/core/TextField";
+// import { CallMissedSharp } from "@material-ui/icons";
 
 const styles = theme => ({
     fab: {
@@ -21,7 +22,7 @@ const styles = theme => ({
     }
 });
 
-const databaseURL="https://wordcloud-practice-default-rtdb.firebaseio.com/";
+const databaseURL="https://wordcloud-practice-default-rtdb.firebaseio.com";
 
 class Words extends React.Component {
     constructor() {
@@ -41,12 +42,12 @@ class Words extends React.Component {
             return res.json();
         }).then(words => this.setState({words: words}));
     }
-    _post(word) {
+    _post(word){
         return fetch(`${databaseURL}/words.json`, {
             method: 'POST',
             body: JSON.stringify(word)
         }).then(res => {
-            if(res.status !== 200) {
+            if(res.stastus !== 200) {
                 throw new Error(res.statusText);
             }
             return res.json();
@@ -57,7 +58,7 @@ class Words extends React.Component {
         });
     }
     _delete(id) {
-        return fetch(`${databaseURL}/words/${id}.json`, {
+        return fetch(`${databaseURL}/words/${id}.json`,{
             method: 'DELETE'
         }).then(res => {
             if(res.status !== 200) {
@@ -68,8 +69,11 @@ class Words extends React.Component {
             let nextState = this.state.words;
             delete nextState[id];
             this.setState({words: nextState});
-        })
+        });
     }
+    // shouldComponentUpdate(nextProps, nextState) {
+    //     return nextState.words !== this.state.words;
+    // }
     componentDidMount() {
         this._get();
     }
@@ -80,12 +84,6 @@ class Words extends React.Component {
         let nextState = {};
         nextState[e.target.name] = e.target.value;
         this.setState(nextState);
-        if(e.target.value < 1) {
-            this.setState({weight: 1});
-        }
-        else if(e.target.value > 9) {
-            this.setState({weight: 9});
-        }
     }
     handleSubmit = () => {
         const word = {
@@ -93,7 +91,7 @@ class Words extends React.Component {
             weight: this.state.weight
         }
         this.handleDialogToggle();
-        if (!word.word && !word.weight) {
+        if(!word.word && !word.weight) {
             return;
         }
         this._post(word);
@@ -102,7 +100,7 @@ class Words extends React.Component {
         this._delete(id);
     }
     render() {
-        const {classes} = this.props;
+        const { classes } = this.props;
         return (
             <div>
                 {Object.keys(this.state.words).map(id => {
@@ -128,15 +126,14 @@ class Words extends React.Component {
                             </Card>
                         </div>
                     );
-                })}
                 <Fab color="primary" className={classes.fab} onClick={this.handleDialogToggle}>
                     <AddIcon />
                 </Fab>
                 <Dialog open={this.state.dialog} onClose={this.handleDialogToggle}>
                     <DialogTitle>단어 추가</DialogTitle>
                     <DialogContent>
-                        <TextField label="단어" type="text" name="word" value={this.state.word} onChange={this.handleValueChange} /><br />
-                        <TextField label="가중치(1부터 9까지)" type="number" name="weight" value={this.state.weight} onChange={this.handleValueChange} /><br />
+                        <TextField label="단어" type="text" name="word" value={this.state.word} onChange={this.handleValueChange} /><br/>
+                        <TextField label="가중치" type="text" name="weight" value={this.state.weight} onChange={this.handleValueChange} /><br/>
                     </DialogContent>
                     <DialogActions>
                         <Button variant="contained" color="primary" onClick={this.handleSubmit}>추가</Button>
